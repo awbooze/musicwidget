@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 25
 
     defaultConfig {
         applicationId "xyz.jathak.musicwidget"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 2030
         versionName "2.0.3"
     }
@@ -20,5 +20,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:palette-v7:23.4.0'
+    implementation 'com.android.support:palette-v7:25.4.0'
 }

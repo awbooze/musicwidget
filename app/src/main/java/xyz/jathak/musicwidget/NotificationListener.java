@@ -15,24 +15,29 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.NonNull;
 import android.view.KeyEvent;
 
 import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class NotificationListener extends NotificationListenerService{
+
     private MediaSessionManager mediaSessionManager;
     private MediaController mediaController;
     public static boolean online;
     private ComponentName componentName = new ComponentName("xyz.jathak.musicwidget","xyz.jathak.musicwidget.NotificationListener");
+
     @Override
     public void onCreate(){
-        registerReceiver(button,new IntentFilter(StandardWidget.WIDGET_ACTION));
+
+        registerReceiver(button, new IntentFilter(StandardWidget.WIDGET_ACTION));
         mediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
         mediaSessionManager.addOnActiveSessionsChangedListener(sessionListener, componentName);
         List<MediaController> controllers = mediaSessionManager.getActiveSessions(componentName);
         mediaController = pickController(controllers);
-        if(mediaController!=null) {
+
+        if(mediaController != null) {
             mediaController.registerCallback(callback);
             meta = mediaController.getMetadata();
             updateMetadata();
@@ -43,10 +48,13 @@ public class NotificationListener extends NotificationListenerService{
 
     @Override
     public int onStartCommand(Intent i, int startId, int i2){
-        if(mediaController==null){
+
+        if(mediaController == null){
+
             List<MediaController> controllers = mediaSessionManager.getActiveSessions(componentName);
             mediaController = pickController(controllers);
-            if(mediaController!=null) {
+
+            if(mediaController != null) {
                 mediaController.registerCallback(callback);
                 meta = mediaController.getMetadata();
                 updateMetadata();
@@ -65,14 +73,14 @@ public class NotificationListener extends NotificationListenerService{
         }
 
         @Override
-        public void onSessionEvent(String event, Bundle extras) {
+        public void onSessionEvent(@NonNull String event, Bundle extras) {
             super.onSessionEvent(event, extras);
             updateMetadata();
             sendBroadcast(new Intent(StandardWidget.WIDGET_UPDATE));
         }
 
         @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
             super.onPlaybackStateChanged(state);
             StandardWidget.currentlyPlaying = state.getState() == PlaybackState.STATE_PLAYING;
             updateMetadata();
@@ -117,8 +125,10 @@ public class NotificationListener extends NotificationListenerService{
     public void onNotificationRemoved(StatusBarNotification statusBarNotification) {
 
     }
+
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
+
         unregisterReceiver(button);
         mediaController = null;
         online = false;
@@ -126,20 +136,27 @@ public class NotificationListener extends NotificationListenerService{
     }
 
 
-    public void updateMetadata(){
-        if(mediaController!=null&&mediaController.getPlaybackState()!=null){
+    public void updateMetadata() {
+
+        if(mediaController != null && mediaController.getPlaybackState() != null){
             StandardWidget.currentlyPlaying = mediaController.getPlaybackState().getState() == PlaybackState.STATE_PLAYING;
         }
-        if(meta==null)return;
-        StandardWidget.currentArt=meta.getBitmap(MediaMetadata.METADATA_KEY_ART);
-        if(StandardWidget.currentArt==null){
+
+        if(meta == null){
+            return;
+        }
+
+        StandardWidget.currentArt = meta.getBitmap(MediaMetadata.METADATA_KEY_ART);
+        if(StandardWidget.currentArt == null) {
             StandardWidget.currentArt = meta.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         }
-        if(StandardWidget.currentArt==null){
+        if(StandardWidget.currentArt == null) {
             StandardWidget.currentArt = meta.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON);
         }
         StandardWidget.currentSquareArt = StandardWidget.currentArt;
-        if(StandardWidget.currentArt!=null) {
+
+        if(StandardWidget.currentArt != null) {
+
             int cah = StandardWidget.currentArt.getHeight();
             int caw = StandardWidget.currentArt.getWidth();
             if (caw > cah * 1.02) {
@@ -147,50 +164,67 @@ public class NotificationListener extends NotificationListenerService{
                         (int) (caw / 2 - cah * 0.51), 0, (int) (cah * 1.02), cah);
             }
         }
-        StandardWidget.currentArtist=meta.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        StandardWidget.currentSong=meta.getString(MediaMetadata.METADATA_KEY_TITLE);
-        if(StandardWidget.currentSong==null){
-            StandardWidget.currentSong=meta.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
+
+        StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        StandardWidget.currentSong = meta.getString(MediaMetadata.METADATA_KEY_TITLE);
+        if(StandardWidget.currentSong == null){
+            StandardWidget.currentSong = meta.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
         }
-        StandardWidget.currentAlbum=meta.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        if(StandardWidget.currentArtist==null){
+        StandardWidget.currentAlbum = meta.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        if(StandardWidget.currentArtist == null){
             StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST);
         }
-        if(StandardWidget.currentArtist==null) {
+        if(StandardWidget.currentArtist == null) {
             StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_AUTHOR);
         }
-        if(StandardWidget.currentArtist==null) {
+        if(StandardWidget.currentArtist == null) {
             StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE);
         }
-        if(StandardWidget.currentArtist==null) {
+        if(StandardWidget.currentArtist == null) {
             StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_WRITER);
         }
-        if(StandardWidget.currentArtist==null) {
+        if(StandardWidget.currentArtist == null) {
             StandardWidget.currentArtist = meta.getString(MediaMetadata.METADATA_KEY_COMPOSER);
         }
-        if(StandardWidget.currentArtist==null)StandardWidget.currentArtist = "";
-        if(StandardWidget.currentSong==null)StandardWidget.currentSong = "";
-        if(StandardWidget.currentAlbum==null)StandardWidget.currentAlbum = "";
+        if(StandardWidget.currentArtist == null) {
+            StandardWidget.currentArtist = "";
+        }
+        if(StandardWidget.currentSong == null) {
+            StandardWidget.currentSong = "";
+        }
+        if(StandardWidget.currentAlbum == null) {
+            StandardWidget.currentAlbum = "";
+        }
+
+        // Sends broadcast to update the widget
         sendBroadcast(new Intent(StandardWidget.WIDGET_UPDATE));
     }
 
-    private MediaController pickController(List<MediaController> controllers){
-        for(int i=0;i<controllers.size();i++){
+    private MediaController pickController(List<MediaController> controllers) {
+
+        for(int i = 0; i < controllers.size(); i++){
+
             MediaController mc = controllers.get(i);
-            if(mc!=null&&mc.getPlaybackState()!=null&&
-                    mc.getPlaybackState().getState()==PlaybackState.STATE_PLAYING){
+            if(mc != null && mc.getPlaybackState() != null &&
+                    mc.getPlaybackState().getState() == PlaybackState.STATE_PLAYING){
                 return mc;
             }
         }
-        if(controllers.size()>0) return controllers.get(0);
+        if(controllers.size() > 0) {
+            return controllers.get(0);
+        }
+
         return null;
     }
 
     MediaSessionManager.OnActiveSessionsChangedListener sessionListener = new MediaSessionManager.OnActiveSessionsChangedListener() {
         @Override
         public void onActiveSessionsChanged(List<MediaController> controllers) {
+
             mediaController = pickController(controllers);
-            if(mediaController==null)return;
+            if(mediaController == null){
+                return;
+            }
             mediaController.registerCallback(callback);
             meta = mediaController.getMetadata();
             updateMetadata();
@@ -238,29 +272,37 @@ public class NotificationListener extends NotificationListenerService{
         sendBroadcast(new Intent(StandardWidget.WIDGET_UPDATE));
     }*/
 
-    BroadcastReceiver button = new BroadcastReceiver(){
+    BroadcastReceiver button = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             //Play is 0, next is 1, previous is 2
             int action = intent.getIntExtra("type",-1);
-            if(mediaController!=null&&action==0){
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
-            }else if(mediaController!=null&&action ==1){
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_MEDIA_NEXT));
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_MEDIA_NEXT));
-            }else if (mediaController!=null&&action==2){
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_MEDIA_PREVIOUS));
-                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_MEDIA_PREVIOUS));
-            }else if (action==3){
+
+            if(mediaController != null && action == 0) {
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+            }
+            else if(mediaController != null && action == 1) {
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT));
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT));
+            }
+            else if (mediaController != null && action == 2) {
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
+                mediaController.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PREVIOUS));
+            }
+            else if (action == 3) {
+
                 PackageManager m = context.getPackageManager();
-                if(mediaController==null) {
+                if(mediaController == null) {
+
                     SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
                     String pack = p.getString("appLaunch", "");
                     if (!pack.equals("")) {
                         startActivity(m.getLaunchIntentForPackage(pack));
                     }
-                }else{
+                }
+                else {
                     startActivity(m.getLaunchIntentForPackage(mediaController.getPackageName()));
                 }
             }

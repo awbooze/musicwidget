@@ -3,13 +3,11 @@ package xyz.jathak.musicwidget;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -26,6 +24,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -43,10 +42,15 @@ public class MainActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
 
         public PlaceholderFragment() {
+
         }
+
+        // This creates the entire layout for the main fragment/selection screen.
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
             int layout = R.layout.fragment_main_plus;
             View rootView = inflater.inflate(layout, container, false);
             Button b = (Button) rootView.findViewById(R.id.button);
@@ -57,6 +61,7 @@ public class MainActivity extends Activity {
                     startActivity(i);
                 }
             });
+
             final SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(getActivity());
             final int style = p.getInt("style", R.id.albummatch);
             RadioGroup group = (RadioGroup)rootView.findViewById(R.id.group);
@@ -64,15 +69,16 @@ public class MainActivity extends Activity {
             group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                    if(i!=p.getInt("style", R.id.albummatch)){
+                    if(i != p.getInt("style", R.id.albummatch)){
                         SharedPreferences.Editor e = p.edit();
                         e.putInt("style",i);
-                        e.commit();
+                        e.apply();
                     }
                     getActivity().sendBroadcast(new Intent(StandardWidget.WIDGET_UPDATE));
                 }
             });
-            final Button app = (Button)rootView.findViewById(R.id.appselect);
+
+            final Button app = (Button) rootView.findViewById(R.id.appselect);
             app.setText(p.getString("appName","None"));
             app.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -84,30 +90,31 @@ public class MainActivity extends Activity {
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     final List<ResolveInfo> packs = pm.queryIntentActivities(intent, PackageManager.PERMISSION_GRANTED);
                     Collections.sort(packs,new AppNameCompare());
-                    final List<String> names = new ArrayList<String>();
+                    final List<String> names = new ArrayList<>();
                     names.add("None");
-                    for(ResolveInfo ai:packs){
+                    for(ResolveInfo ai:packs) {
                         names.add((String) ai.loadLabel(pm));
                     }
-                    ListAdapter la = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,names);
+                    ListAdapter la = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1,names);
                     b.setAdapter(la, new DialogInterface.OnClickListener(){
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             SharedPreferences.Editor e = p.edit();
-                            if(i>0){
+                            if(i > 0) {
                                 e.putString("appLaunch",packs.get(i-1).activityInfo.packageName);
                             }
                             else {
                                 e.putString("appLaunch","");
                             }
                             e.putString("appName",names.get(i));
-                            e.commit();
+                            e.apply();
                             app.setText(names.get(i));
                         }
                     });
                     b.show();
                 }
             });
+
             CheckBox albumName = (CheckBox)rootView.findViewById(R.id.showAlbum);
             albumName.setChecked(p.getBoolean("showAlbum",false));
             albumName.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -115,10 +122,11 @@ public class MainActivity extends Activity {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
                     e.putBoolean("showAlbum",b);
-                    e.commit();
+                    e.apply();
                     update();
                 }
             });
+
             CheckBox songCaps = (CheckBox)rootView.findViewById(R.id.songCaps);
             CheckBox albumCaps = (CheckBox)rootView.findViewById(R.id.albumCaps);
             CheckBox artistCaps = (CheckBox)rootView.findViewById(R.id.artistCaps);
@@ -129,8 +137,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("songCaps",b);
-                    e.commit();
+                    e.putBoolean("songCaps", b);
+                    e.apply();
                     update();
                 }
             });
@@ -138,8 +146,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("artistCaps",b);
-                    e.commit();
+                    e.putBoolean("artistCaps", b);
+                    e.apply();
                     update();
                 }
             });
@@ -147,11 +155,13 @@ public class MainActivity extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("albumCaps",b);
-                    e.commit();
+                    e.putBoolean("albumCaps", b);
+                    e.apply();
                     update();
                 }
             });
+
+            //Spinners, checkboxes, and other materials to define the look of the text in the widget
             Spinner songFont = (Spinner)rootView.findViewById(R.id.songFont);
             Spinner artistFont = (Spinner)rootView.findViewById(R.id.artistFont);
             Spinner albumFont = (Spinner)rootView.findViewById(R.id.albumFont);
@@ -167,6 +177,7 @@ public class MainActivity extends Activity {
             final TextView artistSizeLabel = (TextView)rootView.findViewById(R.id.artistSizeLabel);
             SeekBar albumSize = (SeekBar)rootView.findViewById(R.id.albumSize);
             final TextView albumSizeLabel = (TextView)rootView.findViewById(R.id.albumSizeLabel);
+
             songFont.setSelection(p.getInt("songFont",0));
             artistFont.setSelection(p.getInt("artistFont",0));
             albumFont.setSelection(p.getInt("albumFont",0));
@@ -182,11 +193,13 @@ public class MainActivity extends Activity {
             artistSizeLabel.setText((p.getInt("artistSize",2)*2+10)+" sp");
             albumSize.setProgress(p.getInt("albumSize", 2));
             albumSizeLabel.setText((p.getInt("albumSize",2)*2+10)+" sp");
+
+            //Listeners for all of these checkboxes and other selectors
             songFont.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("songFont",i);
-                    e.commit();
+                    e.putInt("songFont", i);
+                    e.apply();
                     update();
                 }
                 public void onNothingSelected(AdapterView<?> adapterView) {}
@@ -194,8 +207,8 @@ public class MainActivity extends Activity {
             artistFont.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("artistFont",i);
-                    e.commit();
+                    e.putInt("artistFont", i);
+                    e.apply();
                     update();
                 }
                 public void onNothingSelected(AdapterView<?> adapterView) {}
@@ -203,8 +216,8 @@ public class MainActivity extends Activity {
             albumFont.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("albumFont",i);
-                    e.commit();
+                    e.putInt("albumFont", i);
+                    e.apply();
                     update();
                 }
                 public void onNothingSelected(AdapterView<?> adapterView) {}
@@ -213,47 +226,47 @@ public class MainActivity extends Activity {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
                     e.putBoolean("songBold", b);
-                    e.commit();
+                    e.apply();
                     update();
                 }
             });
             artistBold.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("artistBold",b);
-                    e.commit();
+                    e.putBoolean("artistBold", b);
+                    e.apply();
                     update();
                 }
             });
             albumBold.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("albumBold",b);
-                    e.commit();
+                    e.putBoolean("albumBold", b);
+                    e.apply();
                     update();
                 }
             });
             songItalic.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("songItalic",b);
-                    e.commit();
+                    e.putBoolean("songItalic", b);
+                    e.apply();
                     update();
                 }
             });
             artistItalic.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("artistItalic",b);
-                    e.commit();
+                    e.putBoolean("artistItalic", b);
+                    e.apply();
                     update();
                 }
             });
             albumItalic.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putBoolean("albumItalic",b);
-                    e.commit();
+                    e.putBoolean("albumItalic", b);
+                    e.apply();
                     update();
                 }
             });
@@ -261,8 +274,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("songSize",i);
-                    e.commit();
+                    e.putInt("songSize", i);
+                    e.apply();
                     songSizeLabel.setText((i*2+10)+" sp");
                     update();
                 }
@@ -273,8 +286,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("artistSize",i);
-                    e.commit();
+                    e.putInt("artistSize", i);
+                    e.apply();
                     artistSizeLabel.setText((i*2+10)+" sp");
                     update();
                 }
@@ -285,8 +298,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                     SharedPreferences.Editor e = p.edit();
-                    e.putInt("albumSize",i);
-                    e.commit();
+                    e.putInt("albumSize", i);
+                    e.apply();
                     albumSizeLabel.setText((i*2+10)+" sp");
                     update();
                 }
@@ -297,10 +310,12 @@ public class MainActivity extends Activity {
             return rootView;
         }
 
+        //Sends an update to the widgets so they can update their text and artwork
         public void update(){
             getActivity().sendBroadcast(new Intent(StandardWidget.WIDGET_UPDATE));
         }
     }
+
     static PackageManager pm;
     static class AppNameCompare implements Comparator<ResolveInfo> {
 
